@@ -7,19 +7,21 @@ blueprint:
       name: Thiết bị
       description: Chọn các thiết bị cần bật tắt tự động
       selector:
-          target:
+        target:
+          entity:
+            domain: switch
     trigger_motion_sensor:
       name: Cảm biến chuyển động
       description: Chọn 1 cảm biến chuyển động trong phòng vệ sinh
       selector:
-          entity:
-            domain: binary_sensor
+        entity:
+          domain: binary_sensor
     trigger_door_sensor:
       name: Cảm biến cửa
       description: Chọn 1 cảm biến cửa trong phòng vệ sinh
       selector:
-          entity:
-            domain: binary_sensor
+        entity:
+          domain: binary_sensor
     door_open_wait:
       name: Thời gian chờ khi mở cửa rồi mới tắt đèn
       description: Thời gian chờ khi mở cửa rồi mới tắt đèn
@@ -36,7 +38,7 @@ blueprint:
       selector:
         number:
           min: 0
-          max: 300  
+          max: 300
           unit_of_measurement: seconds
 variables:
   trigger_motion_sensor: !input trigger_motion_sensor
@@ -62,22 +64,22 @@ trigger:
     to: "off"
     for: !input no_motion_wait
 action:
-  - delay: 
-      seconds: '{{ !input door_open_wait | int }}'
+  - delay:
+      seconds: "{{ !input door_open_wait | int }}"
   - service_template: >
       {% if trigger.entity_id == trigger_door_sensor %}
         {% if is_state(trigger_door_sensor, "on") and is_state(target_switch, "off") %}  
         switch.turn_on
-        {% elif (is_state(trigger_door_sensor, "on")) and (is_state(target_switch, "on")) %}
+        {% elif is_state(trigger_door_sensor, "on") and is_state(target_switch, "on") %}
         switch.turn_off
         {% endif %}
       {% elif trigger.entity_id == trigger_motion_sensor %}
         {% if is_state(trigger_motion_sensor, "off") and is_state(trigger_door_sensor, "on") %}  
         switch.turn_off
-        {% elif (is_state(trigger_motion_sensor, "on")) and (is_state(target_switch, "off")) %}
-        switch.turn_on   
+        {% elif is_state(trigger_motion_sensor, "on") and is_state(target_switch, "off") %}
+        switch.turn_on
         {% endif %}
-      {% endif %} 
-    data_template: 
-      entity_id: 
+      {% endif %}
+    data_template:
+      entity_id:
         - !input target_switch
